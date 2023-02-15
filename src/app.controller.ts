@@ -1,17 +1,17 @@
-import { Controller, Get, Post } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Post } from "@nestjs/common";
+import { AppService } from "./app.service";
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post('where-people')
-  async getHello(): Promise<string> {
-    return this.appService.getChannels();
+  @Post("where-people")
+  async getWherePeople(): Promise<string> {
+    return this.appService.getWherePeople();
   }
 
-  @Get('/oauth/callback')
+  @Get("/oauth/callback")
   async redirect(): Promise<string> {
-    return 'Redirected';
+    return "Redirected";
   }
 }
