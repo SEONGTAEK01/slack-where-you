@@ -2,19 +2,24 @@ import { Injectable } from "@nestjs/common";
 import { WebClient } from "@slack/web-api";
 import { Message } from "@slack/web-api/dist/response/ConversationsHistoryResponse";
 
+import * as fs from "fs";
+
 @Injectable()
 export class AppService {
   private readonly client: WebClient;
+  private userNameList: { [x: string]: any };
 
   constructor() {
     console.log("Initiating Slack API client...");
+
     this.client = new WebClient(process.env.SLACK_BOT_TOKEN);
+    this.userNameList = this.loadAllUserInfo();
   }
 
-  async getWherePeople(userName: string): Promise<any> {
+  async getWherePeople(userId: string): Promise<any> {
     const threadFound = await this.findLatestThread();
     const replies = await this.getReplies(threadFound);
-    const userStatus = await this.findUserStatus(userName, replies);
+    const userStatus = await this.findUserStatus(userId, replies);
 
     return userStatus;
   }
@@ -25,7 +30,6 @@ export class AppService {
         channel: process.env.DAILY_CHECKIN_CHANNEL,
         ts: threadFound.thread_ts,
       });
-      console.log(replies);
       return replies;
     } catch (error) {
       console.error(error);
@@ -33,32 +37,56 @@ export class AppService {
   }
 
   async getConversationHistory(): Promise<any> {
-    return this.client.conversations.history({
-      channel: process.env.DAILY_CHECKIN_CHANNEL,
-      limit: 5,
-    });
+    try {
+      const history = this.client.conversations.history({
+        channel: process.env.DAILY_CHECKIN_CHANNEL,
+        limit: 5,
+      });
+      return history;
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async findLatestThread(): Promise<any> {
-    const response = await this.getConversationHistory();
-    const threadFound = response.messages.find(
-      (msg: { text: any; thread_ts: any }) => msg.text && msg.thread_ts
-    );
-    console.log(threadFound);
-    return threadFound;
+    try {
+      const response = await this.getConversationHistory();
+      const threadFound = response.messages.find(
+        (msg: { text: any; thread_ts: any }) => msg.text && msg.thread_ts
+      );
+      return threadFound;
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async findUserStatus(
     userId: string,
     replies: { messages: any[] }
   ): Promise<any> {
-    console.log("====================================");
-    console.log(replies.messages);
     replies.messages.reverse();
-    const userStatus = replies.messages.find(
-      (msg) => msg.user === userId && msg.parent_user_id
-    );
-    console.log("userStatus: " + userStatus.text);
-    return userStatus;
+
+    try {
+      const userStatus = replies.messages.find(
+        (msg) => msg.user === userId && msg.parent_user_id
+      );
+      console.log("userStatus: " + userStatus.text);
+      return userStatus;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  loadAllUserInfo() {
+    console.log("Loading user name...");
+    const data = fs.readFileSync("src/resource/user_list.json", "utf8");
+    const users: { [key: string]: string } = JSON.parse(data);
+
+    console.log(users);
+    return users;
+  }
+
+  getUserIdFromName(name: string) {
+    return this.userNameList[name];
   }
 }

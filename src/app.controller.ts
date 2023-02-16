@@ -7,8 +7,8 @@ export class AppController {
 
   @Post("where-people")
   async getWherePeople(@Body() body: any): Promise<string> {
-    console.log(body);
-    return this.appService.getWherePeople("U7QALSDL5");
+    const userId = await this.appService.getUserIdFromName(body.text);
+    return await this.appService.getWherePeople(userId);
   }
 
   @Get("/oauth/callback")
