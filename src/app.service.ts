@@ -102,10 +102,12 @@ export class AppService {
     },
     targetName: string
   ): Promise<string> {
-    const humanReadableTime = await this.getKoreaStandardTime(userStatus.ts);
-    return this.isUndefined(userStatus.text)
-      ? "출근 전"
-      : `[${humanReadableTime}] (${targetName}) ${userStatus.text}`;
+    if (this.isUndefined(userStatus)) {
+      return "출근 전 입니다.";
+    } else {
+      const humanReadableTime = await this.getKoreaStandardTime(userStatus.ts);
+      return `[${humanReadableTime}] (${targetName}) ${userStatus.text}`;
+    }
   }
 
   async getKoreaStandardTime(timestamp: string): Promise<string> {
