@@ -16,11 +16,11 @@ export class AppService {
     this.userNameList = this.loadAllUserInfo();
   }
 
-  async getWherePeople(userId: string): Promise<any> {
+  async getWherePeople(userId: string, targetName: string): Promise<any> {
     const threadFound = await this.findLatestThread();
     const replies = await this.getReplies(threadFound);
     const userStatus = await this.findUserStatus(userId, replies);
-    const result = await this.formatUserStatus(userStatus);
+    const result = await this.formatUserStatus(userStatus, targetName);
 
     console.log(result);
     return result;
@@ -95,16 +95,19 @@ export class AppService {
     return value === undefined || value === null;
   }
 
-  async formatUserStatus(userStatus: {
-    ts: string;
-    text: string;
-  }): Promise<string> {
+  async formatUserStatus(
+    userStatus: {
+      ts: string;
+      text: string;
+    },
+    targetName: string
+  ): Promise<string> {
     const utcTime = parseFloat(userStatus.ts);
     const date = new Date(utcTime * 1000);
     const humanReadableTime = date.toLocaleString();
 
     return this.isUndefined(userStatus.text)
       ? "출근 전"
-      : `[${humanReadableTime}] ${userStatus.text}`;
+      : `[${humanReadableTime}] (${targetName}) ${userStatus.text}`;
   }
 }
