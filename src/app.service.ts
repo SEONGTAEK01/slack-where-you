@@ -71,15 +71,15 @@ export class AppService {
         (msg) => msg.user === userId && msg.parent_user_id
       );
       console.log("userStatus: " + userStatus.text);
-      return userStatus;
+      return this.isUndefined(userStatus.text) ? "출근 전" : userStatus;
     } catch (error) {
       console.error(error);
     }
   }
 
   loadAllUserInfo() {
-    console.log("Loading user name...");
-    const data = fs.readFileSync("src/resource/user_list.json", "utf8");
+    console.log("Loading user name by ID...");
+    const data = fs.readFileSync(process.env.USER_ID_LIST_PATH, "utf8");
     const users: { [key: string]: string } = JSON.parse(data);
 
     console.log(users);
@@ -88,5 +88,9 @@ export class AppService {
 
   getUserIdFromName(name: string) {
     return this.userNameList[name];
+  }
+
+  isUndefined(value: any) {
+    return value === undefined || value === null;
   }
 }

@@ -8,6 +8,10 @@ export class AppController {
   @Post("where-people")
   async getWherePeople(@Body() body: any): Promise<string> {
     const userId = await this.appService.getUserIdFromName(body.text);
+    if (this.appService.isUndefined(userId)) {
+      return "룩시드랩스에 존재하지 않는 동료 입니다 :)";
+    }
+
     return await this.appService.getWherePeople(userId);
   }
 
