@@ -102,12 +102,21 @@ export class AppService {
     },
     targetName: string
   ): Promise<string> {
-    const utcTime = parseFloat(userStatus.ts);
-    const date = new Date(utcTime * 1000);
-    const humanReadableTime = date.toLocaleString();
-
+    const humanReadableTime = await this.getKoreaStandardTime(userStatus.ts);
     return this.isUndefined(userStatus.text)
       ? "출근 전"
       : `[${humanReadableTime}] (${targetName}) ${userStatus.text}`;
+  }
+
+  async getKoreaStandardTime(timestamp: string): Promise<string> {
+    const utcTime = parseFloat(timestamp);
+    const date = new Date(utcTime * 1000);
+
+    const timeDiff = 9 * 60 * 60 * 1000;
+    const newUtcTime = date.getTime() + timeDiff;
+    const newDate = new Date(newUtcTime);
+    const formatNewDate = newDate.toLocaleString();
+
+    return formatNewDate;
   }
 }
