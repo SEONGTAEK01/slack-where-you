@@ -20,8 +20,10 @@ export class AppService {
     const threadFound = await this.findLatestThread();
     const replies = await this.getReplies(threadFound);
     const userStatus = await this.findUserStatus(userId, replies);
+    const result = await this.formatUserStatus(userStatus);
 
-    return userStatus;
+    console.log(result);
+    return result;
   }
 
   async getReplies(threadFound: Message): Promise<any> {
@@ -70,8 +72,7 @@ export class AppService {
       const userStatus = replies.messages.find(
         (msg) => msg.user === userId && msg.parent_user_id
       );
-      console.log("userStatus: " + userStatus.text);
-      return this.isUndefined(userStatus.text) ? "출근 전" : userStatus;
+      return userStatus;
     } catch (error) {
       console.error(error);
     }
@@ -92,5 +93,18 @@ export class AppService {
 
   isUndefined(value: any) {
     return value === undefined || value === null;
+  }
+
+  async formatUserStatus(userStatus: {
+    ts: string;
+    text: string;
+  }): Promise<string> {
+    const utcTime = parseFloat(userStatus.ts);
+    const date = new Date(utcTime * 1000);
+    const humanReadableTime = date.toLocaleString();
+
+    return this.isUndefined(userStatus.text)
+      ? "출근 전"
+      : `[${humanReadableTime}] ${userStatus.text}`;
   }
 }
