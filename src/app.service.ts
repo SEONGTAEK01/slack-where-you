@@ -103,7 +103,7 @@ export class AppService {
     targetName: string
   ): Promise<string> {
     if (this.isUndefined(userStatus)) {
-      return "출근 전 입니다.";
+      return `${targetName} 님은 출근 전 입니다.`;
     } else {
       const humanReadableTime = await this.getKoreaStandardTime(userStatus.ts);
       return `[${humanReadableTime}] (${targetName}) ${userStatus.text}`;
